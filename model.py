@@ -17,9 +17,55 @@ def train_validate_test_split(df, target, seed=123):
     The function returns, in this order, train, validate and test dataframes. 
     '''
     train_validate, test = train_test_split(df, test_size=0.15, 
-                                            random_state=seed, 
-                                            stratify=df[target])
+                                            random_state=seed)
     train, validate = train_test_split(train_validate, test_size=0.1765, 
-                                       random_state=seed,
-                                       stratify=train_validate[target])
+                                       random_state=seed)
     return train, validate, test
+
+
+def visualize_scaler(scaler, df, columns_to_scale, bins=10):
+    '''This function visualizes the difference in original data and scaled data. It takes the scaler type,
+    dataframe, columns included in scaling, and outputs multiple visualizations based on those
+    features. The 
+    '''
+    fig, axs = plt.subplots(len(columns_to_scale), 2, figsize=(16,9))
+    df_scaled = df.copy()
+    df_scaled[columns_to_scale] = scaler.fit_transform(df[columns_to_scale])
+    for (ax1, ax2), col in zip(axs, columns_to_scale):
+        ax1.hist(df[col], bins=bins)
+        ax1.set(title=f'{col} before scaling', xlabel=col, ylabel='count')
+        ax2.hist(df_scaled[col], bins=bins)
+        ax2.set(title=f'{col} after scaling with {scaler.__class__.__name__}', xlabel=col, ylabel='count')
+    plt.tight_layout()
+#    return fig, axs
+
+def scale_data(train, 
+               validate, 
+               test, 
+               columns_to_scale=['bedrooms', 'bathrooms', 'area','tax_value'],
+               return_scaler=False):
+    '''This function takes in train, validate, test, and outputs scaled data based on
+    the chosen method (quantile scaling) using the columns selected as the only columns
+    that will be scaled. This function also returns the scaler object as an array if set 
+    to true'''
+    # make copies of our original data
+    train_scaled = train.copy()
+    validate_scaled = validate.copy()
+    test_scaled = test.copy()
+     # select a scaler
+    scaler = QuantileTransformer(random_state=123, output_distribution='normal')
+     # fit on train
+    scaler.fit(train[columns_to_scale])
+    # applying the scaler:
+    train_scaled[columns_to_scale] = pd.DataFrame(scaler.transform(train[columns_to_scale]),
+                                                  columns=train[columns_to_scale].columns.values).set_index([train.index.values])
+                                                  
+    validate_scaled[columns_to_scale] = pd.DataFrame(scaler.transform(validate[columns_to_scale]),
+                                                  columns=validate[columns_to_scale].columns.values).set_index([validate.index.values])
+    
+    test_scaled[columns_to_scale] = pd.DataFrame(scaler.transform(test[columns_to_scale]),
+                                                 columns=test[columns_to_scale].columns.values).set_index([test.index.values])
+    if return_scaler:
+        return scaler, train_scaled, validate_scaled, test_scaled
+    else:
+        return train_scaled, validate_scaled, test_scaled
