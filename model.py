@@ -6,6 +6,7 @@ import scipy.stats as stats
 import env
 
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler, QuantileTransformer
 
 def train_validate_test_split(df, target, seed=123):
     '''

@@ -59,7 +59,8 @@ def remove_outliers(df,feature_list):
     return df
     
 def clean_zillow(df):
-    ''' This function takes in zillow data and returns a clean dataset.
+    ''' This function takes in zillow data, renames columns, replaces whitespace with nan values,
+    and drops null values. This function returns a df.
     '''
     # renaming columns
     df = df.rename(columns = {'bedroomcnt':'bedrooms', 
@@ -72,6 +73,9 @@ def clean_zillow(df):
     
     # Replace a whitespace sequence or empty with a NaN value and reassign this manipulation to df. 
     df = df.replace(r'^\s*$', np.nan, regex=True)
+    
+    # Removes null values
+    df = df.dropna()
     
     return df
     
@@ -89,3 +93,4 @@ def train_validate_test_split(df, seed=123):
     train, validate = train_test_split(train_validate, test_size=0.1765, 
                                        random_state=seed)
     return train, validate, test
+
