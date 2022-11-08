@@ -4,6 +4,7 @@ import seaborn as sns
 
 from sklearn.model_selection import train_test_split
 
+
 import os
 import numpy as np
 import env
@@ -76,6 +77,12 @@ def clean_zillow(df):
     
     # Removes null values
     df = df.dropna()
+    
+    # Relabeling FIPS data
+    df['fips'] = df.fips.astype(int)
+    df['fips_loc'] = df.fips.replace({6037:'Los Angeles, CA',
+                       6059:'Orange, CA',
+                       6111:'Ventura, CA'})
     
     return df
     
