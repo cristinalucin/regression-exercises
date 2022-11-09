@@ -66,7 +66,7 @@ def clean_zillow(df):
     # renaming columns
     df = df.rename(columns = {'bedroomcnt':'bedrooms', 
                           'bathroomcnt':'bathrooms', 
-                          'calculatedfinishedsquarefeet':'area',
+                          'calculatedfinishedsquarefeet':'square_feet',
                           'taxvaluedollarcnt':'tax_value', 
                           'yearbuilt':'year_built',
                           'taxamount':'tax_amount'
@@ -78,17 +78,17 @@ def clean_zillow(df):
     # Removes null values
     df = df.dropna()
     
-    # Converting some columns from float to integers
+    # Converting some columns from float to integers or objects
     df["fips"] = df["fips"].astype(int)
     df["year_built"] = df["year_built"].astype(int)
     df["bedrooms"] = df["bedrooms"].astype(int)    
     df["tax_value"] = df["tax_value"].astype(int)
-    df["area"] = df["area"].astype(int)
+    df["square_feet"] = df["square_feet"].astype(int)
     
     # Relabeling FIPS data
-    df['fips_loc'] = df.fips.replace({6037:'Los Angeles, CA',
-                       6059:'Orange, CA',
-                       6111:'Ventura, CA'})
+    df['county'] = df.fips.replace({6037:'Los Angeles',
+                       6059:'Orange',
+                       6111:'Ventura'})
     
     #Creating new column for home age using year_built, casting as integer
     df['home_age'] = 2017- df.year_built
