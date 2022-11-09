@@ -82,7 +82,6 @@ def clean_zillow(df):
     df["fips"] = df["fips"].astype(int)
     df["year_built"] = df["year_built"].astype(int)
     df["bedrooms"] = df["bedrooms"].astype(int)    
-    df["tax_value"] = df["tax_value"].astype(int)
     df["square_feet"] = df["square_feet"].astype(int)
     
     # Relabeling FIPS data
