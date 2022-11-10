@@ -52,8 +52,8 @@ def remove_outliers(df,feature_list):
         Q3 = df[feature].quantile(0.75)
         IQR = Q3 - Q1
         #Set limits
-        upper_limit = Q3 + 1.5 * IQR
-        lower_limit = Q1 - 1.5 * IQR
+        upper_limit = Q3 + 3 * IQR
+        lower_limit = Q1 - 3 * IQR
         #remove outliers
         df = df[(df[feature] > lower_limit) & (df[feature] < upper_limit)]
     
@@ -83,6 +83,7 @@ def clean_zillow(df):
     df["year_built"] = df["year_built"].astype(int)
     df["bedrooms"] = df["bedrooms"].astype(int)    
     df["square_feet"] = df["square_feet"].astype(int)
+    df["tax_value"] = df["tax_value"].astype(int)
     
     # Relabeling FIPS data
     df['county'] = df.fips.replace({6037:'Los Angeles',
