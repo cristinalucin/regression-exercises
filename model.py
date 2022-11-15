@@ -54,7 +54,7 @@ def scale_data(train,
     validate_scaled = validate.copy()
     test_scaled = test.copy()
      # select a scaler
-    scaler = QuantileTransformer(random_state=123, output_distribution='normal')
+    scaler = MinMaxScaler()
      # fit on train
     scaler.fit(train[columns_to_scale])
     # applying the scaler:
@@ -70,3 +70,34 @@ def scale_data(train,
         return scaler, train_scaled, validate_scaled, test_scaled
     else:
         return train_scaled, validate_scaled, test_scaled
+    
+def model_prep(train,validate,test):
+    '''
+    This function prepares train, validate, test for modeling by dropping columns not necessary
+    or compatible with modeling algorithms.
+    '''
+    # drop columns not needed
+    keep_cols = ['bedrooms',
+                 'bathrooms',
+                 'square_feet',
+                 'tax_value',
+                 'home_age',
+                 'county_Los Angeles',
+                 'county_Orange',
+                 'county_Ventura']
+    
+    train = train[keep_cols]
+    validate = validate[keep_cols]
+    test = test[keep_cols]
+
+    # Split data into predicting variables (X) and target variable (y) and reset the index for each dataframe
+    X_train = train.drop(columns='tax_value').reset_index(drop=True)
+    y_train = train[['tax_value']].reset_index(drop=True)
+
+    X_validate = validate.drop(columns='tax_value').reset_index(drop=True)
+    y_validate = validate[['tax_value']].reset_index(drop=True)
+
+    X_test = test.drop(columns='tax_value').reset_index(drop=True)
+    y_test = test[['tax_value']].reset_index(drop=True)
+    
+    return X_train, X_validate, X_test, y_train, y_validate, y_test

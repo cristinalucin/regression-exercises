@@ -71,7 +71,6 @@ def clean_zillow(df):
                           'yearbuilt':'year_built',
                           'taxamount':'tax_amount'
                     })
-    
     # Replace a whitespace sequence or empty with a NaN value and reassign this manipulation to df. 
     df = df.replace(r'^\s*$', np.nan, regex=True)
     
@@ -93,6 +92,12 @@ def clean_zillow(df):
     #Creating new column for home age using year_built, casting as integer
     df['home_age'] = 2017- df.year_built
     df["home_age"] = df["home_age"].astype(int)
+    
+    #Remove outliers
+    df = remove_outliers(df,['bedrooms','bathrooms','square_feet','tax_value','tax_amount'])
+    
+    #Make dummy variables from county
+    df = pd.get_dummies(df, columns=['county'], drop_first=False)
     
     return df
     
