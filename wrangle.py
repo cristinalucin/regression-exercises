@@ -12,7 +12,8 @@ import env
 from env import user, password, host
 
 def get_zillow_data():
-    ''' Retrieve data from Zillow database within codeup, selecting specific features 
+    ''' Retrieve data from Zillow database within codeup, selecting specific features
+    If data is not present in directory, this function writes a copy locally as a csv file. 
     '''
     filename = "zillow.csv"
 
@@ -22,13 +23,15 @@ def get_zillow_data():
         # read the SQL query into a dataframe
         query = '''
             
-        SELECT bedroomcnt, bathroomcnt, calculatedfinishedsquarefeet, taxvaluedollarcnt, yearbuilt, taxamount, fips
+        SELECT bedroomcnt, bathroomcnt, calculatedfinishedsquarefeet, fips, garagecarcnt, latitude, longitude,
+        lotsizesquarefeet, poolcnt,  yearbuilt, numberofstories, taxvaluedollarcnt, transactiondate, predictions_2017.parcelid
         FROM properties_2017
-
         LEFT JOIN propertylandusetype USING(propertylandusetypeid)
-
+        JOIN predictions_2017 USING (parcelid)
         WHERE propertylandusedesc IN ("Single Family Residential",                       
-                              "Inferred Single Family Residential")'''
+                                "Inferred Single Family Residential")
+                                AND predictions_2017.transactiondate LIKE '2017%'
+                '''
         df = pd.read_sql(query, get_connection('zillow'))
 
         # Write that dataframe to disk for later. Called "caching" the data for later.
@@ -65,17 +68,23 @@ def clean_zillow(df):
     '''
     # renaming columns
     df = df.rename(columns = {'bedroomcnt':'bedrooms', 
-                          'bathroomcnt':'bathrooms', 
-                          'calculatedfinishedsquarefeet':'square_feet',
-                          'taxvaluedollarcnt':'tax_value', 
-                          'yearbuilt':'year_built',
-                          'taxamount':'tax_amount'
+                              'bathroomcnt':'bathrooms', 
+                              'calculatedfinishedsquarefeet':'square_feet',
+                              'taxvaluedollarcnt':'tax_value', 
+                              'yearbuilt':'year_built',
+                              'taxamount':'tax_amount',
+                              'lotsizesquarefeet' : 'lot_size',
+                              'transactiondate' : 'transaction_date',
+                              'parcelid' : 'parcel_id'
                     })
     # Replace a whitespace sequence or empty with a NaN value and reassign this manipulation to df. 
     df = df.replace(r'^\s*$', np.nan, regex=True)
     
     # Removes null values
     df = df.dropna()
+    
+    #Drop Duplicates
+    df = df.drop_duplicates(keep=False)
     
     # Converting some columns from float to integers or objects
     df["fips"] = df["fips"].astype(int)
@@ -100,7 +109,7 @@ def clean_zillow(df):
     df = pd.get_dummies(df, columns=['county'], drop_first=False)
     
     return df
-    
+
 def train_validate_test_split(df, seed=123):
     '''
     This function takes in a dataframe, the name of the target variable
